@@ -1,37 +1,8 @@
-//modified by:
-//date:
-//purpose:
+//Project by:Alexander and Erick 
+//Framework: Gordon Griesel
+//Class: CS3420
 //
-//cs3350 Spring 2017 Lab-1
-//author: Gordon Griesel
-//date: 2014 to present
-//This program demonstrates the use of OpenGL and XWindows
-//
-//Assignment is to modify this program.
-//You will follow along with your instructor.
-//
-//Elements to be learned in this lab...
-//
-//. general animation framework
-//. animation loop
-//. object definition and movement
-//. collision detection
-//. mouse/keyboard interaction
-//. object constructor
-//. coding style
-//. defined constants
-//. use of static variables
-//. dynamic memory allocation
-//. simple opengl components
-//. git
-//
-//elements we will add to program...
-//. Game constructor
-//. multiple particles
-//. gravity
-//. collision detection
-//. more objects
-//
+
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -41,8 +12,8 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-#define WINDOW_WIDTH  800
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH  900
+#define WINDOW_HEIGHT 700
 
 #define MAX_PARTICLES 1
 #define GRAVITY 0.1
@@ -70,7 +41,7 @@ struct Particle {
 };
 
 struct Game {
-	Shape box;
+	Shape box[4];
 	Particle particle;
 	int n;
 };
@@ -96,10 +67,28 @@ int main(void)
 	game.n=0;
 
 	//declare a box shape
-	game.box.width = 100;
-	game.box.height = 10;
-	game.box.center.x = 120 + 5*65;
-	game.box.center.y = 500 - 5*60;
+	game.box[0].width = 100;
+	game.box[0].height = 10;
+	game.box[0].center.x = 120 + 5*65;
+	game.box[0].center.y = 400 - 5*60;
+
+        game.box[1].width = 10;
+	game.box[1].height = 100;
+	game.box[1].center.x = 300 + 5*65;
+	game.box[1].center.y = 500 - 5*60;
+
+	game.box[2].width = 10;
+	game.box[2].height = 100;
+	game.box[2].center.x = -40 + 5*65;
+	game.box[2].center.y = 500 - 5*60;
+	
+	game.box[3].width = 100;
+	game.box[3].height = 10;
+	game.box[3].center.x = 120 + 5*65;
+	game.box[3].center.y = 800 - 5*60;
+
+
+
 
 	//start animation
 	while (!done) {
@@ -261,9 +250,10 @@ void render(Game *game)
 	//Draw shapes...
 
 	//draw box
+	for (int i = 0; i < 4; i++) {
 	Shape *s;
 	glColor3ub(90,140,90);
-	s = &game->box;
+	s = &game->box[i];
 	glPushMatrix();
 	glTranslatef(s->center.x, s->center.y, s->center.z);
 	w = s->width;
@@ -275,7 +265,7 @@ void render(Game *game)
 		glVertex2i( w,-h);
 	glEnd();
 	glPopMatrix();
-
+	}
 	//draw all particles here
 	glPushMatrix();
 	glColor3ub(150,160,220);
