@@ -169,8 +169,8 @@ void makeParticle(Game *game, int x, int y)
 	std::cout << "makeParticle() " << x << " " << y << std::endl;
 	//position of particle
 	Particle *p = &game->particle;
-	p->s.center.x = x;
-	p->s.center.y = y;
+	p->s.center.x = 437;
+	p->s.center.y = 343;
 	p->velocity.y = -4.0;
 	p->velocity.x =  1.0;
 	game->n++;
