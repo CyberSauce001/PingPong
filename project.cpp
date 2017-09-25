@@ -66,26 +66,26 @@ int main(void)
 	Game game;
 	game.n=0;
 
-	//declare a box shape
-	game.box[0].width = 100;
+	//Bottom Bar
+	game.box[0].width = 50;
 	game.box[0].height = 10;
 	game.box[0].center.x = 120 + 5*65;
-	game.box[0].center.y = 400 - 5*60;
-
+	game.box[0].center.y = 325 - 5*60;
+	//Right Bar
         game.box[1].width = 10;
-	game.box[1].height = 100;
+	game.box[1].height = 50;
 	game.box[1].center.x = 300 + 5*65;
 	game.box[1].center.y = 500 - 5*60;
-
+	//Left Bar
 	game.box[2].width = 10;
-	game.box[2].height = 100;
+	game.box[2].height = 50;
 	game.box[2].center.x = -40 + 5*65;
 	game.box[2].center.y = 500 - 5*60;
-	
-	game.box[3].width = 100;
+	//Top Bar
+	game.box[3].width = 50;
 	game.box[3].height = 10;
 	game.box[3].center.x = 120 + 5*65;
-	game.box[3].center.y = 800 - 5*60;
+	game.box[3].center.y = 975 - 5*60;
 
 
 
