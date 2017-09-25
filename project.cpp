@@ -74,13 +74,13 @@ int main(void)
 	//Right Bar
         game.box[1].width = 10;
 	game.box[1].height = 50;
-	game.box[1].center.x = 300 + 5*65;
-	game.box[1].center.y = 500 - 5*60;
+	game.box[1].center.x = 550 + 5*65;
+	game.box[1].center.y = 650 - 5*60;
 	//Left Bar
 	game.box[2].width = 10;
 	game.box[2].height = 50;
-	game.box[2].center.x = -40 + 5*65;
-	game.box[2].center.y = 500 - 5*60;
+	game.box[2].center.x = -295 + 5*65;
+	game.box[2].center.y = 650 - 5*60;
 	//Top Bar
 	game.box[3].width = 50;
 	game.box[3].height = 10;
