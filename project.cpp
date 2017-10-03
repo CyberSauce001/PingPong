@@ -1,316 +1,325 @@
-//Project by:Alexander and Erick 
-//Framework: Gordon Griesel
-//Class: CS3420
-//
-
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
+//Project by Alex and Erick
+//CMPS 3640
+#include <GL/freeglut.h>
+#include <time.h>
 #include <cmath>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <GL/glx.h>
 
-#define WINDOW_WIDTH  900
-#define WINDOW_HEIGHT 700
-
-#define MAX_PARTICLES 10
-#define GRAVITY 0.1
-#define rnd() (float)rand() / (float)RAND_MAX
-
-//X Windows variables
-Display *dpy;
-Window win;
-GLXContext glc;
-
-//Structures
-
-struct Vec {
-	float x, y, z;
-};
-
-struct Shape {
-	float width, height;
-	float radius;
-	Vec center;
-};
-
-struct Particle {
-	Shape s;
-	Vec velocity;
-};
-
-class Game {
-	public:
-	unsigned char keys[65536];
-	Shape box[4];
-	Particle particle[MAX_PARTICLES];
-	int n;
-	Game() {
-		n = 0;
+class game{
+public:
+	int OrthoWid;
+	int OrthoHei;
+	int WinWid;
+	int WinHei;
+	int winXPos;
+	int winYPos;
+	float FieldSizeX;
+	float FieldSizeY;
+	int delay;
+	float PThickness;
+	float BallSize;
+	float BorderT;
+	float MLineT;
+	int ScoreL;
+	int ScoreR;
+	float TextPosX;
+	float TextPosY;
+	float BallSpeedX;
+	float PSpeedY;
+	game(){
+		WinWid = 700;
+		WinHei = 700;
+		OrthoWid = 700;
+		OrthoHei = 700;	
+		winXPos = 100;
+		winYPos = 100;
+		delay = 1;
+		PThickness = 10;
+		BallSize = 5;
+		FieldSizeX = 600;
+		FieldSizeY = 400;
+		BorderT = 10;
+		MLineT = 5;
+		ScoreL = 0;
+		ScoreR = 0;
+		TextPosX = 0;
+		TextPosY = FieldSizeY + 10;
+		BallSpeedX = 0.5;
+		PSpeedY = 1;
 	}
-}g;
+	void start_settings();
+	void win();
+	void KeyControl();
+	void KeyReset();
+	void DrawField();
+	void DrawScore();
+}settings;
 
-//Function prototypes
-void initXWindows(void);
-void init_opengl(void);
-void cleanupXWindows(void);
-void check_mouse(XEvent *e, Game *game);
-int check_keys(XEvent *e, Game *game);
-void movement(Game *game);
-void render(Game *game);
+class ball{
+public:
+float x;
+float y;
+float vx;
+float vy;
+void move();
+void reflection();
+void draw();
+}ball;
 
+class reflector{
+public: 
+	float x,y;
+	float vy;
+	float size;
+	bool Up, Down, hold;
+	reflector(){
+	vy = 0;
+	y = 0;
+	Up = false;
+	Down = false;
+	hold = false;
+	}
+	void draw(); 
+	void move();
+	void care();
+}left,right;
 
-int main(void)
-{
-	int done=0;
+void game::KeyReset(){
+left.vy = 0;
+right.vy = 0;
+}
+
+void game::KeyControl(){
+	if((left.Up)&&(!left.Down))left.vy = PSpeedY;
+	if((!left.Up)&&(left.Down))left.vy = -PSpeedY;
+	if((right.Up)&&(!right.Down))right.vy = PSpeedY;
+	if((!right.Up)&&(right.Down))right.vy = -PSpeedY;
+}
+
+void game::start_settings(){
+left.size = 200;
+right.size = 200;
+left.x = -510;
+right.x = 510;
+while(ball.vx == 0)ball.vx = (rand()%3 - 1)*BallSpeedX;
+ball.vy = 0;
+ball.x = 0;
+ball.y = 0;
+}
+
+void game::win(){
+	if((ScoreL == 8)||(ScoreR == 8)){
+		glutTimerFunc(2000,exit,0);
+		settings.delay = 10000;
+	}
+	if(ball.x < left.x + PThickness - BallSpeedX){
+		//start_settings();
+		right.hold = true;	
+		ScoreR++;
+	}
+	if(ball.x > right.x - PThickness + BallSpeedX){
+		//start_settings();
+		left.hold = true;		
+		ScoreL++;
+	}
+}
+
+void reflector::care(){
+	if(hold){
+		ball.vx = 0;
+		if(x < 0)ball.x = x + 2*settings.PThickness;
+		if(x > 0)ball.x = x - 2*settings.PThickness;
+		ball.vy = vy;
+		ball.y = y;
+	}
+}
+
+void game::DrawField(){
+	glColor3f(1,1,1);
+	glVertex2f(-FieldSizeX - BorderT,-FieldSizeY - BorderT);
+	glVertex2f(FieldSizeX + BorderT,-FieldSizeY - BorderT);
+	glVertex2f(FieldSizeX + BorderT,-FieldSizeY);
+	glVertex2f(-FieldSizeX - BorderT,-FieldSizeY);
+
+	glVertex2f(-FieldSizeX - BorderT,FieldSizeY + BorderT);
+	glVertex2f(FieldSizeX + BorderT,FieldSizeY + BorderT);
+	glVertex2f(FieldSizeX + BorderT,FieldSizeY);
+	glVertex2f(-FieldSizeX - BorderT,FieldSizeY);
+
+	glVertex2f(-FieldSizeX - BorderT,-FieldSizeY - BorderT);
+	glVertex2f(-FieldSizeX,-FieldSizeY - BorderT);
+	glVertex2f(-FieldSizeX,FieldSizeY + BorderT);
+	glVertex2f(-FieldSizeX - BorderT, FieldSizeY + BorderT);
+
+	glVertex2f(FieldSizeX,-FieldSizeY - BorderT);
+	glVertex2f(FieldSizeX + BorderT,-FieldSizeY - BorderT);
+	glVertex2f(FieldSizeX + BorderT,FieldSizeY + BorderT);
+	glVertex2f(FieldSizeX, FieldSizeY + BorderT);
+
+	for(float i = -FieldSizeY; i <= FieldSizeY; i += 4*MLineT){
+		glVertex2f(-MLineT,i + MLineT);
+		glVertex2f(MLineT,i + MLineT);
+		glVertex2f(MLineT,i - MLineT);
+		glVertex2f(-MLineT,i - MLineT);
+	}
+}
+
+void game::DrawScore(){
+	glRasterPos2f(TextPosX - 50, TextPosY + 20);
+	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + ScoreL);
+	glRasterPos2f(TextPosX + 30, TextPosY + 20);
+	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + ScoreR);
+	if(ScoreL == 3){
+		glRasterPos2f(TextPosX - 200, TextPosY + 40);
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'W');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'I');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'E');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'R');
+	}
+	if(ScoreR == 3){
+		glRasterPos2f(TextPosX + 150, TextPosY + 40);
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'W');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'I');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'E');
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'R');
+	}
+}
+
+void reflector::move(){
+	y += vy;
+	if(y < -settings.FieldSizeY + size/2){
+		y = -settings.FieldSizeY + size/2;
+		vy = 0;
+	}
+	if(y > settings.FieldSizeY - size/2){
+		y = settings.FieldSizeY - size/2;
+		vy = 0;
+	}
+}
+
+void reflector::draw(){
+glColor3f(1,1,1);
+glVertex2f(x + settings.PThickness,y + size/2);
+glVertex2f(x + settings.PThickness,y - size/2);
+glVertex2f(x - settings.PThickness,y - size/2);
+glVertex2f(x - settings.PThickness,y + size/2);
+}
+
+void ball::reflection(){
+if((y <= -settings.FieldSizeY)||(y >= settings.FieldSizeY))vy = -vy;
+if((x <= left.x+settings.PThickness)&&(fabs(double(y - left.y)) <= left.size/2 + fabs(vy))){
+	vx = -vx; 
+	vy += left.vy;
+}
+if((x >= right.x-settings.PThickness)&&(fabs(double(y - right.y)) <= right.size/2 + fabs(vy))){
+	vx = -vx; 
+	vy += right.vy;
+}
+}
+
+void ball::draw(){
+glVertex2f(x+settings.BallSize,y+settings.BallSize);
+glVertex2f(x+settings.BallSize,y-settings.BallSize);
+glVertex2f(x-settings.BallSize,y-settings.BallSize);
+glVertex2f(x-settings.BallSize,y+settings.BallSize);
+}
+
+void ball::move(){
+	x += vx;
+	y += vy;
+}
+
+void keyboard(unsigned char key, int x,int y){
+	switch(key){
+	case 'q' :
+		left.Up = true;
+		break;
+	case 'a' :
+		left.Down = true;
+		break;
+	case 'z' :
+		if(left.hold){
+			left.hold = false;
+			ball.vx = settings.BallSpeedX;
+		}
+		break;
+	case 'p' :
+		right.Up = true;
+		break;
+	case 'l' :
+		right.Down = true;
+		break;
+	case 'm' :
+		if(right.hold){
+			right.hold = false;
+			ball.vx = -settings.BallSpeedX;
+		break;
+		}
+	}	
+}
+
+void keyboardUp(unsigned char key, int x,int y){
+	switch(key){
+	case 'q' :
+		left.Up = false;
+		break;
+	case 'a' :
+		left.Down = false;
+		break;
+	case 'p' :
+		right.Up = false;
+		break;
+	case 'l' :
+		right.Down = false;
+		break;
+	}	
+}
+
+void Timer (int value){
+	settings.win();
+	settings.KeyControl();
+	left.move();
+	right.move();
+	ball.move();
+	ball.reflection();
+	left.care();
+	right.care();
+	settings.KeyReset();
+	glutPostRedisplay();
+	glutTimerFunc(settings.delay,Timer,0);
+}
+
+void draw(){
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBegin(GL_QUADS);
+	right.draw();
+	left.draw();
+	ball.draw();
+	settings.DrawField();
+	glEnd();
+	settings.DrawScore();
+	glutSwapBuffers();
+}
+
+int main (int argc, char ** argv){
 	srand(time(NULL));
-	initXWindows();
-	init_opengl();
-	//declare game object
-	Game game;
-	game.n=0;
-
-	//Bottom Bar
-	game.box[0].width = 50;
-	game.box[0].height = 10;
-	game.box[0].center.x = 120 + 5*65;
-	game.box[0].center.y = 325 - 5*60;
-	//Right Bar
-	game.box[1].width = 10;
-	game.box[1].height = 50;
-	game.box[1].center.x = 550 + 5*65;
-	game.box[1].center.y = 650 - 5*60;
-	//Left Bar
-	game.box[2].width = 10;
-	game.box[2].height = 50;
-	game.box[2].center.x = -295 + 5*65;
-	game.box[2].center.y = 650 - 5*60;
-	//Top Bar
-	game.box[3].width = 50;
-	game.box[3].height = 10;
-	game.box[3].center.x = 120 + 5*65;
-	game.box[3].center.y = 975 - 5*60;
-
-
-
-
-	//start animation
-	while (!done) {
-		while (XPending(dpy)) {
-			XEvent e;
-			XNextEvent(dpy, &e);
-			check_mouse(&e, &game);
-			done = check_keys(&e, &game);
-		}
-		movement(&game);
-		render(&game);
-		glXSwapBuffers(dpy, win);
-	}
-	cleanupXWindows();
-	return 0;
+	settings.start_settings();
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
+	glutInitWindowSize(settings.WinWid, settings.WinHei);
+	glutInitWindowPosition(settings.winXPos, settings.winYPos);
+	glutCreateWindow("Ping Pong");
+	glutDisplayFunc(draw);
+	glutTimerFunc(settings.delay,Timer,0);
+	glutKeyboardFunc(keyboard);
+	glutKeyboardUpFunc(keyboardUp);
+	glClearColor(0,0,0,1.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-settings.OrthoWid,settings.OrthoWid,-settings.OrthoHei,settings.OrthoHei);
+	glutMainLoop();
+	return(0);
 }
-
-void set_title(void)
-{
-	//Set the window title bar.
-	XMapWindow(dpy, win);
-	XStoreName(dpy, win, "335 Lab1   LMB for particle");
-}
-
-void cleanupXWindows(void)
-{
-	//do not change
-	XDestroyWindow(dpy, win);
-	XCloseDisplay(dpy);
-}
-
-void initXWindows(void)
-{
-	//do not change
-	GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-	int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
-	dpy = XOpenDisplay(NULL);
-	if (dpy == NULL) {
-		std::cout << "\n\tcannot connect to X server\n" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	Window root = DefaultRootWindow(dpy);
-	XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-	if (vi == NULL) {
-		std::cout << "\n\tno appropriate visual found\n" << std::endl;
-		exit(EXIT_FAILURE);
-	} 
-	Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-	XSetWindowAttributes swa;
-	swa.colormap = cmap;
-	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-		ButtonPress | ButtonReleaseMask | PointerMotionMask |
-		StructureNotifyMask | SubstructureNotifyMask;
-	win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-			InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-	set_title();
-	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-	glXMakeCurrent(dpy, win, glc);
-}
-
-void init_opengl(void)
-{
-	//OpenGL initialization
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	//Initialize matrices
-	glMatrixMode(GL_PROJECTION); glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-	//Set 2D mode (no perspective)
-	glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
-	//Set the screen background color
-	glClearColor(0.1, 0.1, 0.1, 1.0);
-}
-
-void makeParticle(Game *game, int x, int y)
-{
-	if (game->n >= MAX_PARTICLES)
-		return;
-
-	//std::cout << "makeParticle() " << x << " " << y << std::endl;
-
-	//position of particle
-	Particle *p = &game->particle[game->n];
-	//p->s.center.x = 437;
-	//p->s.center.y = 343;
-	p->s.center.x = x/2;
-	p->s.center.y = y/2;
-	//p->velocity.y = -4.0;
-	//p->velocity.x =  1.0;
-	p->velocity.y = (rand()%20)-10;
-	p->velocity.x = (rand()%20)-10;
-	game->n++;
-}
-
-void check_mouse(XEvent *e, Game *game)
-{
-	static int savex = 0;
-	static int savey = 0;
-	static int n = 0;
-
-	if (e->type == ButtonRelease) {
-		return;
-	}
-	if (e->type == ButtonPress) {
-		if (e->xbutton.button==1) {
-			//Left button was pressed
-			//int y = WINDOW_HEIGHT - e->xbutton.y;
-			//makeParticle(game, e->xbutton.x, y); // created by mouse possition
-			makeParticle(game, WINDOW_WIDTH, WINDOW_HEIGHT);
-			return;
-		}
-		if (e->xbutton.button==3) {
-			//Right button was pressed
-			return;
-		}
-	}
-	//Did the mouse move?
-	if (savex != e->xbutton.x || savey != e->xbutton.y) {
-		savex = e->xbutton.x;
-		savey = e->xbutton.y;
-		if (++n < 10)
-			return;
-	}
-}
-
-int check_keys(XEvent *e, Game *game)
-{
-	//Was there input from the keyboard?
-		int key = XLookupKeysym(&e->xkey, 0);
-		if (e->type == KeyRelease) {
-			g.keys[key]=0;
-		}
-		if (key == XK_Escape) {
-			return 1;
-		}  
-		if (e->type == KeyPress) {
-			g.keys[key]=1;
-		}
-		//You may check other keys here.
-		switch (key) {
-			case XK_Left:
-				break;
-			case XK_Right:
-				break;
-		}
-
-	return 0;
-		
-}
-
-void movement(Game *game)
-{
-	Particle *p;
-
-	if (game->n <= 0)
-		return;
-
-	for(int i = 0; i < game->n; i++) {
-		p = &game->particle[i];
-		p->s.center.x += p->velocity.x;
-		p->s.center.y += p->velocity.y;
-
-		//check for collision with shapes...
-		//Shape *s;
-
-		//check for off-screen
-		// if (p->s.center.y < 0.0) {
-		if (p->s.center.y < 0.0 || p->s.center.x < 0.0 ||
-				p->s.center.y > 700 || p->s.center.x > 900) {
-			std::cout << "off screen" << std::endl;
-			// game->n = 0;
-			game->particle[i] = game->particle[--game->n];
-		}
-	}
-	}
-
-	void render(Game *game)
-	{
-		float w, h;
-		glClear(GL_COLOR_BUFFER_BIT);
-		//Draw shapes...
-
-		//draw box
-		for (int i = 0; i < 4; i++) {
-			Shape *s;
-			glColor3ub(90,140,90);
-			s = &game->box[i];
-			glPushMatrix();
-			glTranslatef(s->center.x, s->center.y, s->center.z);
-			w = s->width;
-			h = s->height;
-			glBegin(GL_QUADS);
-			glVertex2i(-w,-h);
-			glVertex2i(-w, h);
-			glVertex2i( w, h);
-			glVertex2i( w,-h);
-			glEnd();
-			glPopMatrix();
-		}
-		//draw all particles here
-		for(int i = 0; i < game->n; i++) {
-			//rndB = rand() % (255 - 130 +1) + 190;
-			glPushMatrix();
-			glColor3ub(150,160,220);
-			//glColor3ub(57,57,rndB);
-			Vec *c = &game->particle[i].s.center;
-			w = 20;
-			h = 20;
-			glBegin(GL_QUADS);
-			glVertex2i(c->x-w, c->y-h);
-			glVertex2i(c->x-w, c->y+h);
-			glVertex2i(c->x+w, c->y+h);
-			glVertex2i(c->x+w, c->y-h);
-			glEnd();
-			glPopMatrix();
-		}
-	}
-
-
-
