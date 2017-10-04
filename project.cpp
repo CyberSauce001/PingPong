@@ -168,24 +168,6 @@ void game::DrawScore(){
 	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + ScoreL);
 	glRasterPos2f(TextPosX + 30, TextPosY + 20);
 	glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + ScoreR);
-	if(ScoreL == 3){
-		glRasterPos2f(TextPosX - 200, TextPosY + 40);
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'W');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'I');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'E');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'R');
-	}
-	if(ScoreR == 3){
-		glRasterPos2f(TextPosX + 150, TextPosY + 40);
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'W');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'I');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'N');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'E');
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, 'R');
-	}
 }
 
 void reflector::move(){
@@ -323,3 +305,5 @@ int main (int argc, char ** argv){
 	glutMainLoop();
 	return(0);
 }
+
+
