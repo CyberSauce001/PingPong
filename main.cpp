@@ -30,7 +30,7 @@ int main (int argc, char ** argv){
  while(running)
         {
            while(SDL_PollEvent(&event))
-              if(event.type==SDL_Quit || event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_ESCAPE)
+              if(event.type==SDL_QUIT || event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_ESCAPE)
                 running=false;
             TCPsocket tmpsocket =SDLNet_TCP_Accept(server);
             if(tmpsocket)
@@ -87,11 +87,12 @@ SDLNet_TCP_Send(tmpsocket,tmp, strlen(tmp)+1);
                         playerNum--;
  			}else if (num == 3) {
                         int tmpvar;
+			sscanf(tmp, "3 %d", &tmpvar);
                         for(int k=0;k<socketvector.size();k++)
                           if(socketvector[k].id==tmpvar)
                           {
                              SDLNet_TCP_Send(socketvector[k].socket,
-                                tmpvar,strlen(tmp)+1);
+                                tmp,strlen(tmp)+1);
                              break;
                           }
                     }
