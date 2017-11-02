@@ -75,22 +75,26 @@ class reflector{
     float x,y;
     float vy;
     float size;
-    bool Up, Down, hold;
+    bool Up, Down, Left, Right, hold;
     reflector(){
       vy = 0;
       y = 0;
       Up = false;
       Down = false;
+      Left = false;
+      Right = false;
       hold = false;
     }
     void draw(); 
     void move();
     void care();
-}left,right;
+}left,right,l,r;
 
 void game::KeyReset(){
   left.vy = 0;
   right.vy = 0;
+  l.vx = 0;
+  r.vx = 0;
 }
 
 void game::KeyControl(){
@@ -98,10 +102,22 @@ void game::KeyControl(){
     left.vy = PSpeedY;
   if((!left.Up)&&(left.Down))
     left.vy = -PSpeedY;
+
   if((right.Up)&&(!right.Down))
     right.vy = PSpeedY;
   if((!right.Up)&&(right.Down))
     right.vy = -PSpeedY;
+
+  if((l.Left)&&(!l.Right))
+    l.vx = PSpeedX;
+  if((!r.Left)&&(r.Right))
+    l.vx = -PSpeedX;
+
+  if((r.Left)&&(!r.Right))
+    r.vx = PSpeedX;
+  if((!r.Left)&&(r.Right))
+    r.vx = -PSpeedX;
+
 }
 
 void game::start_settings(){
@@ -193,7 +209,8 @@ void reflector::move(){
     vy = 0;
   }
 }
-
+//For this we will need to create an opposite to move side to side instead
+//of up and down for l and r
 void reflector::draw(){
   glColor3f(1,1,1);
   glVertex2f(x + settings.PThickness,y + size/2);
@@ -231,6 +248,17 @@ void ball::move(){
 
 void keyboard(unsigned char key, int x,int y){
   switch(key){
+    case 't': 
+	l.Left = true;
+	break;
+    case 'y':
+	l.Right = true;
+    case 'v':
+	r.Left = true;
+	break;
+    case 'b':
+	r.Right = true;
+	break;
     case 'q' :
       left.Up = true;
       break;
@@ -276,6 +304,18 @@ void keyboardUp(unsigned char key, int x,int y){
     case 'l' :
       right.Down = false;
       break;
+    case 't':
+      l.Left = false;
+      break;
+    case 'y':
+      l.Right = false;
+      break;
+    case 'v':
+      r.Left = false;
+      break;
+    case 'b':
+      r.Right = false;
+      break;
   }	
 }
 
@@ -283,11 +323,15 @@ void Timer (int value){
   settings.win();
   settings.KeyControl();
   left.move();
+  l.move();
   right.move();
+  r.move();
   ball.move();
   ball.reflection();
   left.care();
+  l.care();
   right.care();
+  r.care();
   settings.KeyReset();
   glutPostRedisplay();
   glutTimerFunc(settings.delay,Timer,0);
@@ -297,7 +341,9 @@ void draw(){
   glClear(GL_COLOR_BUFFER_BIT);
   glBegin(GL_QUADS);
   right.draw();
+  r.draw();
   left.draw();
+  l.draw();
   ball.draw();
   settings.DrawField();
   glEnd();
