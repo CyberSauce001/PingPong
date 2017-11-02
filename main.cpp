@@ -4,24 +4,25 @@
 #include <vector>
 #define SDL_reinterpret_cast(type, expression) reinterpret_cast<type>(expression)
 
+//contain socket for each player and their data
 struct data{
         TCPsocket socket;
         Uint32 timeout; // assume disconnection if timeout
-        int id;
+        int id; //create an id for each player connected
         data(TCPsocket sock,Uint32 t, int i) : socket(sock),
-        timeout(t), id(i) {}
+        timeout(t), id(i) {} //set a constructor for the data of that player
 };
 int main (int argc, char ** argv){
         //connection
         SDL_Init(SDL_INIT_EVERYTHING);
         SDLNet_Init();
-        int currID=0;
-        int playerNum=0;
-        SDL_Event event;
-        IPaddress ip;
-        SDLNet_ResolveHost(&ip, NULL, 2222);
-        std::vector<data> socketvector;
-        char tmp[2000];
+        int currID=0; //current id for unique identifier
+        int playerNum=0; //current number of player in game
+        SDL_Event event; //handle an event
+        IPaddress ip; //IP address of server
+        SDLNet_ResolveHost(&ip, NULL, 2222);//Grab IP, not connected to anything port
+        std::vector<data> socketvector; // data of all player
+        char tmp[2000]; // store incoming and outcoming data
         bool running = true;
         SDLNet_SocketSet sockets=SDLNet_AllocSocketSet(4);
         SDL_SetVideoMode(640,480,32,SDL_SWSURFACE);
