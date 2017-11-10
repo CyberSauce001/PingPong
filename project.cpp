@@ -29,6 +29,7 @@ class game{
     float TextPosY;
     float BallSpeedX;
     float PSpeedY;
+    float PSpeedX;
     int id;
     game(){
       WinWid = 700;
@@ -48,8 +49,9 @@ class game{
       ScoreR = 0;
       TextPosX = 0;
       TextPosY = FieldSizeY + 10;
-      BallSpeedX = 0.5;
-      PSpeedY = 1;
+      BallSpeedX = 1.5;
+      PSpeedY = 3;
+      PSpeedX = 7;
     }
     void start_settings();
     void win();
@@ -70,61 +72,72 @@ class ball{
     void draw();
 }ball;
 
+class helper{
+  public: 
+    float x,y;
+    float vx;
+    float size;
+    bool right, left, hold;
+    helper(){
+      vx = 0;
+      x = 0;
+      right = false;
+      left = false;
+      hold = false;
+    }
+    void draw(); 
+    void move();
+    //void care();
+}top;
+
 class reflector{
   public: 
     float x,y;
     float vy;
     float size;
-    bool Up, Down, Left, Right, hold;
+    bool Up, Down, hold;
     reflector(){
       vy = 0;
       y = 0;
       Up = false;
       Down = false;
-      Left = false;
-      Right = false;
       hold = false;
     }
     void draw(); 
     void move();
     void care();
-}left,right,l,r;
+}left,right;
 
 void game::KeyReset(){
   left.vy = 0;
   right.vy = 0;
-  l.vx = 0;
-  r.vx = 0;
+  top.vx = 0;
 }
 
 void game::KeyControl(){
-  if((left.Up)&&(!left.Down))
+  if((left.Up)&&(!left.Down))     //left player [1st player]
     left.vy = PSpeedY;
   if((!left.Up)&&(left.Down))
     left.vy = -PSpeedY;
 
-  if((right.Up)&&(!right.Down))
+  if((right.Up)&&(!right.Down))  //right player [2nd player]
     right.vy = PSpeedY;
   if((!right.Up)&&(right.Down))
     right.vy = -PSpeedY;
 
-  if((l.Left)&&(!l.Right))
-    l.vx = PSpeedX;
-  if((!r.Left)&&(r.Right))
-    l.vx = -PSpeedX;
-
-  if((r.Left)&&(!r.Right))
-    r.vx = PSpeedX;
-  if((!r.Left)&&(r.Right))
-    r.vx = -PSpeedX;
-
+  if((top.right)&&(!top.left))   //top player  [3rd player]
+    top.vx = PSpeedX;
+  if((!top.right)&&(top.left))
+    top.vx = -PSpeedX;
 }
 
 void game::start_settings(){
   left.size = 200;
   right.size = 200;
+  top.size = 200;
   left.x = -510;
   right.x = 510;
+  top.y = 405;                   // where top is located
   while(ball.vx == 0)
     ball.vx = (rand()%3 - 1)*BallSpeedX;
   ball.vy = 0;
@@ -209,8 +222,19 @@ void reflector::move(){
     vy = 0;
   }
 }
-//For this we will need to create an opposite to move side to side instead
-//of up and down for l and r
+
+void helper::move(){
+  x += vx;
+  if(x < -settings.FieldSizeX + size/2){
+    x = -settings.FieldSizeX + size/2;
+    vx = 0;
+  }
+  if(x > settings.FieldSizeX - size/2){
+    x = settings.FieldSizeX - size/2;
+    vx = 0;
+  }
+}
+
 void reflector::draw(){
   glColor3f(1,1,1);
   glVertex2f(x + settings.PThickness,y + size/2);
@@ -219,18 +243,36 @@ void reflector::draw(){
   glVertex2f(x - settings.PThickness,y + size/2);
 }
 
+void helper::draw(){
+  glColor3f(1,0,0);
+  glVertex2f(x + size/2, y + settings.PThickness);
+  glVertex2f(x + size/2, y - settings.PThickness);
+  glVertex2f(x - size/2, y - settings.PThickness);
+  glVertex2f(x - size/2, y + settings.PThickness);
+  glColor3f(1,1,1);
+}
+
 void ball::reflection(){
+  //reflection on game field
   if((y <= -settings.FieldSizeY)||(y >= settings.FieldSizeY))
     vy = -vy;
+  //reflection on 1st player [left player]]
   if((x <= left.x+settings.PThickness)&&
-     (fabs(double(y - left.y)) <= left.size/2 + fabs(vy))){
+     (fabs(double(y - left.y)) <= left.size/2 + fabs(vy))){ 
     vx = -vx; 
     vy += left.vy;
   }
+  //reflection on 2nd player [right player]]
   if((x >= right.x-settings.PThickness)&&
      (fabs(double(y - right.y)) <= right.size/2 + fabs(vy))){
     vx = -vx; 
     vy += right.vy;
+  }
+  //reflection on 3nd player [top player]]
+  if((y >= top.y-settings.PThickness)&&
+     (fabs(double(x - top.x)) <= top.size/2 + fabs(vx))){
+    vy = -vy; 
+    vx += top.vx;
   }
 }
 
@@ -248,18 +290,7 @@ void ball::move(){
 
 void keyboard(unsigned char key, int x,int y){
   switch(key){
-    case 't': 
-	l.Left = true;
-	break;
-    case 'y':
-	l.Right = true;
-    case 'v':
-	r.Left = true;
-	break;
-    case 'b':
-	r.Right = true;
-	break;
-    case 'q' :
+    case 'q' :                // 1st player moves [left player]
       left.Up = true;
       break;
     case 'a' :
@@ -271,7 +302,8 @@ void keyboard(unsigned char key, int x,int y){
         ball.vx = settings.BallSpeedX;
       }
       break;
-    case 'p' :
+
+    case 'p' :                //2nd player moves [right player]
       right.Up = true;
       break;
     case 'l' :
@@ -283,7 +315,15 @@ void keyboard(unsigned char key, int x,int y){
         ball.vx = -settings.BallSpeedX;
         break;
       }
-    case 27:
+    
+    case 'y' :                //3rd player moves [top player]
+      top.left = true;
+      break;
+    case 'u' :
+      top.right = true;
+      break;
+
+    case 27:                  //exit game
      glutDestroyWindow(settings.id);
      exit (0);
      break;
@@ -304,17 +344,11 @@ void keyboardUp(unsigned char key, int x,int y){
     case 'l' :
       right.Down = false;
       break;
-    case 't':
-      l.Left = false;
+    case 'y' :
+      top.left = false;
       break;
-    case 'y':
-      l.Right = false;
-      break;
-    case 'v':
-      r.Left = false;
-      break;
-    case 'b':
-      r.Right = false;
+    case 'u' :
+      top.right = false;
       break;
   }	
 }
@@ -323,15 +357,12 @@ void Timer (int value){
   settings.win();
   settings.KeyControl();
   left.move();
-  l.move();
   right.move();
-  r.move();
+  top.move();
   ball.move();
   ball.reflection();
   left.care();
-  l.care();
   right.care();
-  r.care();
   settings.KeyReset();
   glutPostRedisplay();
   glutTimerFunc(settings.delay,Timer,0);
@@ -341,11 +372,10 @@ void draw(){
   glClear(GL_COLOR_BUFFER_BIT);
   glBegin(GL_QUADS);
   right.draw();
-  r.draw();
   left.draw();
-  l.draw();
   ball.draw();
   settings.DrawField();
+  top.draw();
   glEnd();
   settings.DrawScore();
   glutSwapBuffers();
