@@ -88,7 +88,7 @@ class helper{
     void draw(); 
     void move();
     //void care();
-}top;
+}top,bott;
 
 class reflector{
   public: 
@@ -112,6 +112,7 @@ void game::KeyReset(){
   left.vy = 0;
   right.vy = 0;
   top.vx = 0;
+  bott.vx = 0;
 }
 
 void game::KeyControl(){
@@ -129,15 +130,22 @@ void game::KeyControl(){
     top.vx = PSpeedX;
   if((!top.right)&&(top.left))
     top.vx = -PSpeedX;
+  
+  if((bott.right)&&(!bott.left))   //bottom player  [4rd player]
+    bott.vx = PSpeedX;
+  if((!bott.right)&&(bott.left))
+    bott.vx = -PSpeedX;
 }
 
 void game::start_settings(){
   left.size = 200;
   right.size = 200;
   top.size = 200;
+  bott.size = 200;
   left.x = -510;
   right.x = 510;
-  top.y = 405;                   // where top is located
+  top.y = 405;                   // where top is located at start of game
+  bott.y = -405;                   // where bottom is located at start of game
   while(ball.vx == 0)
     ball.vx = (rand()%3 - 1)*BallSpeedX;
   ball.vy = 0;
@@ -244,7 +252,7 @@ void reflector::draw(){
 }
 
 void helper::draw(){
-  glColor3f(1,0,0);
+  glColor3f(0,1,0);
   glVertex2f(x + size/2, y + settings.PThickness);
   glVertex2f(x + size/2, y - settings.PThickness);
   glVertex2f(x - size/2, y - settings.PThickness);
@@ -322,6 +330,13 @@ void keyboard(unsigned char key, int x,int y){
     case 'u' :
       top.right = true;
       break;
+    
+    case 'b' :                //4rd player moves [bottom player]
+      bott.left = true;
+      break;
+    case 'n' :
+      bott.right = true;
+      break;
 
     case 27:                  //exit game
      glutDestroyWindow(settings.id);
@@ -350,6 +365,12 @@ void keyboardUp(unsigned char key, int x,int y){
     case 'u' :
       top.right = false;
       break;
+    case 'b' :
+      bott.left = false;
+      break;
+    case 'n' :
+      bott.right = false;
+      break;
   }	
 }
 
@@ -359,6 +380,7 @@ void Timer (int value){
   left.move();
   right.move();
   top.move();
+  bott.move();
   ball.move();
   ball.reflection();
   left.care();
@@ -376,6 +398,7 @@ void draw(){
   ball.draw();
   settings.DrawField();
   top.draw();
+  bott.draw();
   glEnd();
   settings.DrawScore();
   glutSwapBuffers();
