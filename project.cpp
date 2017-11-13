@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <X11/keysym.h>
+#include "main.cpp"
 
 using std::cout;
 
@@ -30,8 +31,14 @@ class game{
     float BallSpeedX;
     float PSpeedY;
     float PSpeedX;
-    int id;
+    bool online;
+    network* net;
     game(){
+      online = true;
+      char ip[25]
+      if(online){
+          std::cin.getline(ip,25);
+      }
       WinWid = 700;
       WinHei = 700;
       OrthoWid = 700;
@@ -53,12 +60,16 @@ class game{
       PSpeedY = 3;
       PSpeedX = 7;
     }
+  ~game(){
+    delete net;
+  }
     void start_settings();
     void win();
     void KeyControl();
     void KeyReset();
     void DrawField();
     void DrawScore();
+   
 }settings;
 
 class ball{
@@ -95,6 +106,8 @@ class reflector{
     float x,y;
     float vy;
     float size;
+    int id;
+    bool ready;
     bool Up, Down, hold;
     reflector(){
       vy = 0;
@@ -106,6 +119,9 @@ class reflector{
     void draw(); 
     void move();
     void care();
+    void setID(int i);
+    int getID();
+    bool ready();
 }left,right;
 
 void game::KeyReset(){
@@ -151,7 +167,10 @@ void game::start_settings(){
   ball.vy = 0;
   ball.x = 0;
   ball.y = 0;
-}
+ if(online)
+  {
+    net = new network(ip);
+  }}
 
 void game::win(){
   if((ScoreL == 8)||(ScoreR == 8)){
@@ -404,6 +423,17 @@ void draw(){
   glutSwapBuffers();
 }
 
+void reflector::setID(int i){
+  ready = true;
+  id = i;
+}
+
+int reflector::getID(){
+  return id;
+}
+bool reflector::ready(){
+  return ready;
+}
 int main (int argc, char ** argv){
   srand(time(NULL));
   settings.start_settings();
