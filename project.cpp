@@ -99,6 +99,10 @@ class helper{
     void draw(); 
     void move();
     //void care();
+  
+  void setID(int i);
+    int getID();
+    bool ready();
 }top,bott;
 
 class reflector{
