@@ -23,7 +23,7 @@
  {
     if(p->ready())
     {
-      sprintf(tmp, "1 %d \n", p->getID());
+      sprintf(tmp, "1 %d %d\n", p->getID());
       int size = 0;
       int len=strlen(tmp)+1;
       while(size<len)
@@ -35,5 +35,29 @@
 {
     if(p->ready())
     {
+     sprintf(tmp,"3 %d %d \n", id, p->getID());
+     int size=0;
+     int len=strlen(tmp)+1;
+     while(size<len)
+     {
+       size+=SDLNet_TCP_Send(connection,tmp+size,len-size);
+     }
     }
- void network::recv(std::vector<player*>& players, std::vector::<paddle*> paddle, player* p, std::vector<unsigned int> f);
+}
+ void network::recv(std::vector<player*>& players, std::vector::<paddle*> paddle, player* p, std::vector<unsigned int> f)
+ {
+    while(SDLNet_CheckSockets(socket,0)>0 && SDLNet_SocketREady(connection))
+    { 
+       int offset=0;
+       do{
+           offset+=SDLNet_TCP_Recv(connection,tmp+offset,1400);
+           if(offset<=0)
+             return;
+       }while(tmp[strlen(tmp)-1]!='\n');
+       sscanf(tmp, "%d %d", &type,&id);
+       if(type==0)
+       {
+        p->setId(id);
+       }
+    }
+ }
